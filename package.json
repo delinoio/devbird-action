@@ -1,0 +1,38 @@
+{
+  "name": "autodev-action",
+  "private": true,
+  "version": "0.1.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "NODE_ENV=production rspack",
+    "test": "echo 'No tests specified'",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.13.1",
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^6.0.1",
+    "@actions/http-client": "^2.2.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.2",
+    "@rspack/cli": "^1.5.1",
+    "@rspack/core": "^1.5.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "typescript": "^5.6.2"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx,json,yml,yaml}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
+  }
+}

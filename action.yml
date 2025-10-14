@@ -1,0 +1,121 @@
+name: "AutoDev Action v0.1"
+description: "Fully automated AI-powered development workflow for GitHub repositories."
+branding:
+  icon: 'archive'
+  color: 'gray-dark'
+  
+inputs:
+  prompt:
+    description: "Instructions for AutoDev. Can be a direct prompt or custom template."
+    required: true
+
+  base_branch:
+    description: "The branch to use as the base/source when creating new branches (defaults to repository default branch)"
+    required: false
+
+  mode:
+    description: "The mode to use for the action. Can be 'develop' or 'review'"
+    required: true
+
+  autodev_mode:
+    description: "The AutoDev execution mode. Can be 'develop' (default) or 'plan' (for task graph planning)"
+    required: false
+    default: 'develop'
+
+  agent:
+    description: "The agent to use for the action. Can be 'claude_code', 'gemini_cli', 'codex_cli' or 'opencode'"
+    required: true
+
+  agent_model:
+    description: "The (optional) model to use for the agent"
+    required: false
+    default: ''
+
+  # Auth configuration
+  delino_access_token:
+    description: "Delino access token for authentication (optional if using OIDC)"
+    required: false
+
+  autodev_workflow_execution_token:
+    description: "The token to use for the AutoDev task"
+    required: true
+  
+  # For claude code
+  anthropic_api_key:
+    description: "Anthropic API key (required for direct API, not needed for Bedrock/Vertex)"
+    required: false
+  claude_code_oauth_token:
+    description: "Claude Code OAuth token (alternative to anthropic_api_key)"
+    required: false
+
+  # For openai codex
+  openai_api_key:
+    description: "OpenAI API key"
+    required: false
+
+
+runs:
+  using: "composite"
+  steps:
+    # Prepare resources
+    - name: Prepare
+      id: prepare
+      uses: delinoio/autodev-action/prepare@main
+      with:
+        agent: ${{ inputs.agent }}
+        agent_model: ${{ inputs.agent_model }}
+        autodev_mode: ${{ inputs.autodev_mode }}
+        autodev_workflow_execution_token: ${{ inputs.autodev_workflow_execution_token }}
+        base_branch: ${{ inputs.base_branch }}
+        delino_access_token: ${{ inputs.delino_access_token }}
+
+    # Run the AI agent
+    - name: Run Claude Code
+      if: inputs.agent == 'claude_code'
+      uses: anthropics/claude-code-action@v1
+      with:
+        anthropic_api_key: ${{ inputs.anthropic_api_key }}
+        claude_code_oauth_token: ${{ inputs.claude_code_oauth_token }}
+
+        claude_args: |
+          --allowed-tools 'Bash,Edit,Write,WebSearch,WebFetch'
+
+        branch_prefix: 'autodev/'
+        base_branch: ${{ inputs.base_branch }}
+        github_token: ${{ steps.prepare.outputs.github_token }}
+        use_sticky_comment: true
+
+        prompt: |
+          Repository: ${{ github.repository }}
+          Base branch: ${{ inputs.base_branch }}
+          Use `autodev/` prefix for new branch names.
+
+          ---
+
+          ${{ inputs.prompt }}
+
+    - name: Run Codex
+      if: inputs.agent == 'codex_cli'
+      uses: openai/codex-action@main
+      with:
+        openai-api-key: ${{ inputs.openai_api_key }}
+        sandbox: danger-full-access
+        prompt: |
+          Repository: ${{ github.repository }}
+          Base branch: ${{ inputs.base_branch }}
+          Use `autodev/` prefix for new branch names.
+
+          ---
+
+          ${{ inputs.prompt }}
+
+    # Run the postprocess
+    - name: Postprocess
+      uses: delinoio/autodev-action/postprocess@main
+      with:
+        agent: ${{ inputs.agent }}
+        agent_model: ${{ inputs.agent_model }}
+        autodev_mode: ${{ inputs.autodev_mode }}
+        autodev_workflow_execution_token: ${{ inputs.autodev_workflow_execution_token }}
+        base_branch: ${{ inputs.base_branch }}
+        delino_access_token: ${{ inputs.delino_access_token }}

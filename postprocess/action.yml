@@ -1,0 +1,30 @@
+name: 'Postprocess'
+branding:
+  icon: 'archive'
+  color: 'gray-dark'
+description: 'Postprocess the output of the worker'
+inputs:
+  delino_access_token:
+    description: 'Delino access token for authentication'
+    required: true
+  autodev_workflow_execution_token:
+    description: 'The AutoDev task token for linking GitHub Action run'
+    required: true
+  base_branch:
+    description: 'The base branch to use for the action'
+    required: true
+  agent:
+    description: 'The agent to use for the action. Can be "claude_code", "gemini_cli", "codex_cli" or "opencode"'
+    type: string
+    required: true
+  agent_model:
+    description: 'The model to use for the agent'
+    type: string
+    required: true
+  autodev_mode:
+    description: 'The AutoDev execution mode (develop or plan)'
+    required: false
+    default: 'develop'
+runs:
+  using: 'node20'
+  main: '../dist/postprocess.js'
