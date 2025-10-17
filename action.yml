@@ -23,27 +23,9 @@ inputs:
     default: 'develop'
 
   agent:
-    description: "The agent to use for the action. Can be 'claude_code', 'gemini_cli', 'codex_cli' or 'opencode'"
+    description: "The agent to use for the action. Can be 'claude_code', 'gemini_cli', 'codex_cli', 'opencode', 'crush_cli', or 'github_copilot_cli'"
     required: true
 
-  agent_model:
-    description: "The (optional) model to use for the agent"
-    required: false
-    default: ''
-
-  # Auth configuration
-  delino_access_token:
-    description: "Delino access token for authentication (optional if using OIDC)"
-    required: false
-
-  autodev_workflow_execution_token:
-    description: "The token to use for the AutoDev task"
-    required: true
-  
-  # For claude code
-  anthropic_api_key:
-    description: "Anthropic API key (required for direct API, not needed for Bedrock/Vertex)"
-    required: false
   claude_code_oauth_token:
     description: "Claude Code OAuth token (alternative to anthropic_api_key)"
     required: false
@@ -86,13 +68,15 @@ runs:
         use_sticky_comment: true
 
         prompt: |
-          Repository: ${{ github.repository }}
-          Base branch: ${{ inputs.base_branch }}
-          Use `autodev/` prefix for new branch names.
-
+          ${{ inputs.prompt }}
+          
           ---
 
-          ${{ inputs.prompt }}
+          Context:
+            - Repository: ${{ github.repository }}
+            - Base branch: ${{ inputs.base_branch }}
+            - Use `autodev/` prefix for new branch names.
+
 
     - name: Run Codex
       if: inputs.agent == 'codex_cli'
@@ -101,13 +85,16 @@ runs:
         openai-api-key: ${{ inputs.openai_api_key }}
         sandbox: danger-full-access
         prompt: |
-          Repository: ${{ github.repository }}
-          Base branch: ${{ inputs.base_branch }}
-          Use `autodev/` prefix for new branch names.
+          ${{ inputs.prompt }}
 
           ---
 
-          ${{ inputs.prompt }}
+          Context:
+            - Repository: ${{ github.repository }}
+            - Base branch: ${{ inputs.base_branch }}
+            - Use `autodev/` prefix for new branch names.
+
+  
 
     # Run the postprocess
     - name: Postprocess
