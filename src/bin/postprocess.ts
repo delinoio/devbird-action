@@ -79,63 +79,55 @@ async function run(): Promise<void> {
           cwd: process.cwd(),
         }).trim();
 
-        if (branchOutput) {
-          const branches = branchOutput
-            .split("\n")
-            .map((b) => b.trim())
-            .filter((b) => b.length > 0);
+        const branches = !branchOutput
+          ? []
+          : branchOutput
+              .split("\n")
+              .map((b) => b.trim())
+              .filter((b) => b.length > 0);
 
-          if (branches.length > 0) {
+        core.info(`Found ${branches.length} branches: ${branches.join(", ")}`);
+
+        // Send branches to the server
+        const branchEndpoint = `${baseUrl}/delino.autodev.v1.AutoDev/RegisterBranchesByToken`;
+        const branchRequestBody = JSON.stringify({
+          workflow_execution_token: workflowExecutionToken,
+          branch_names: branches,
+        });
+
+        const branchResponse = await http.post(
+          branchEndpoint,
+          branchRequestBody,
+          {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${delinoAccessToken}`,
+          }
+        );
+
+        const branchStatusCode = branchResponse.message.statusCode;
+        const branchBody = await branchResponse.readBody();
+
+        if (branchStatusCode !== 200) {
+          core.warning(`Failed to register branches: ${branchBody}`);
+        } else {
+          const branchResult = JSON.parse(branchBody);
+          if (branchResult.success) {
             core.info(
-              `Found ${branches.length} branches: ${branches.join(", ")}`
+              `Successfully registered branches: ${branchResult.message}`
             );
-
-            // Send branches to the server
-            const branchEndpoint = `${baseUrl}/delino.autodev.v1.AutoDev/RegisterBranchesByToken`;
-            const branchRequestBody = JSON.stringify({
-              workflow_execution_token: workflowExecutionToken,
-              branch_names: branches,
-            });
-
-            const branchResponse = await http.post(
-              branchEndpoint,
-              branchRequestBody,
-              {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${delinoAccessToken}`,
-              }
-            );
-
-            const branchStatusCode = branchResponse.message.statusCode;
-            const branchBody = await branchResponse.readBody();
-
-            if (branchStatusCode !== 200) {
-              core.warning(`Failed to register branches: ${branchBody}`);
-            } else {
-              const branchResult = JSON.parse(branchBody);
-              if (branchResult.success) {
-                core.info(
-                  `Successfully registered branches: ${branchResult.message}`
-                );
-                if (
-                  branchResult.registered_pull_requests &&
-                  branchResult.registered_pull_requests.length > 0
-                ) {
-                  core.info(
-                    `Found ${branchResult.registered_pull_requests.length} existing PRs for these branches`
-                  );
-                }
-              } else {
-                core.warning(
-                  `Failed to register branches: ${branchResult.message}`
-                );
-              }
+            if (
+              branchResult.registered_pull_requests &&
+              branchResult.registered_pull_requests.length > 0
+            ) {
+              core.info(
+                `Found ${branchResult.registered_pull_requests.length} existing PRs for these branches`
+              );
             }
           } else {
-            core.info("No new branches found to register");
+            core.warning(
+              `Failed to register branches: ${branchResult.message}`
+            );
           }
-        } else {
-          core.info("No new branches detected");
         }
       } catch (branchError) {
         core.warning(`Error detecting branches: ${branchError}`);
