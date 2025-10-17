@@ -26,6 +26,11 @@ inputs:
     description: "The agent to use for the action. Can be 'claude_code', 'gemini_cli', 'codex_cli', 'opencode', 'crush_cli', or 'github_copilot_cli'"
     required: true
 
+  agent_model:
+    description: "The (optional) model to use for the agent"
+    required: false
+    default: ''
+
   claude_code_oauth_token:
     description: "Claude Code OAuth token (alternative to anthropic_api_key)"
     required: false
@@ -35,6 +40,13 @@ inputs:
     description: "OpenAI API key"
     required: false
 
+  autodev_workflow_execution_token:
+    description: "AutoDev workflow execution token"
+    required: true
+
+  delino_access_token:
+    description: "Delino access token"
+    required: true
 
 runs:
   using: "composite"
