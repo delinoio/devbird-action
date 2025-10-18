@@ -83,5 +83,3 @@ jobs:
           delino_access_token: ${{ secrets.DELINO_ACCESS_TOKEN }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
-        env:
-          AUTODEV_API_URL: ${{ secrets.AUTODEV_API_URL }}
