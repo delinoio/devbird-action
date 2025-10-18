@@ -19,7 +19,7 @@ inputs:
     default: 'develop'
 
   agent:
-    description: "The agent to use for the action. Can be 'claude_code', 'gemini_cli', 'codex_cli', 'opencode', 'crush_cli', or 'github_copilot_cli'"
+    description: "The agent to use for the action. Can be 'claude_cli', 'claude_code', 'gemini_cli', 'codex_cli', 'opencode', 'crush_cli', or 'github_copilot_cli'"
     required: true
 
   agent_model:
