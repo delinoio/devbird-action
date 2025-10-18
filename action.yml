@@ -13,10 +13,6 @@ inputs:
     description: "The branch to use as the base/source when creating new branches (defaults to repository default branch)"
     required: false
 
-  mode:
-    description: "The mode to use for the action. Can be 'develop' or 'review'"
-    required: true
-
   autodev_mode:
     description: "The AutoDev execution mode. Can be 'develop' (default) or 'plan' (for task graph planning)"
     required: false
