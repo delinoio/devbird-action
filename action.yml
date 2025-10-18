@@ -41,6 +41,15 @@ inputs:
     description: "Anthropic API key"
     required: false
 
+  # For Gemini CLI
+  gemini_api_key:
+    description: "Gemini API key"
+    required: false
+
+  google_api_key:
+    description: "Google API key"
+    required: false
+
   autodev_workflow_execution_token:
     description: "AutoDev workflow execution token"
     required: true
@@ -97,6 +106,25 @@ runs:
       with:
         openai-api-key: ${{ inputs.openai_api_key }}
         sandbox: danger-full-access
+        prompt: |
+          ${{ inputs.prompt }}
+
+          ---
+
+          Context:
+            - Repository: ${{ github.repository }}
+            - Base branch: ${{ inputs.base_branch }}
+            - Use `autodev/` prefix for new branch names.
+
+    - name: Run Gemini CLI
+      if: inputs.agent == 'gemini_cli'
+      uses: google-github-actions/run-gemini-cli@v1
+      env:
+        GITHUB_TOKEN: ${{ steps.prepare.outputs.github_token }}
+      with:
+        gemini_api_key: ${{ inputs.gemini_api_key }}
+        google_api_key: ${{ inputs.google_api_key }}
+        gemini_model: ${{ inputs.agent_model }}
         prompt: |
           ${{ inputs.prompt }}
 
