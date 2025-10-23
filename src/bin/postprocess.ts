@@ -7,7 +7,7 @@ async function run(): Promise<void> {
   try {
     // Get inputs
     const workflowExecutionToken = core.getInput(
-      "autodev_workflow_execution_token",
+      "devbird_workflow_execution_token",
       { required: true }
     );
     if (!workflowExecutionToken) {
@@ -19,22 +19,22 @@ async function run(): Promise<void> {
       required: true,
     });
     const baseBranch = core.getInput("base_branch", { required: false });
-    const autodevMode =
-      core.getInput("autodev_mode", { required: false }) || "develop";
+    const devbirdMode =
+      core.getInput("devbird_mode", { required: false }) || "develop";
 
     // Get GitHub context
     const context = github.context;
     const runId = context.runId.toString();
     // Prepare the API URL
     const baseUrl =
-      process.env.AUTODEV_API_URL || "https://autodev.api.delino.io";
+      process.env.DEVBIRD_API_URL || "https://devbird.api.delino.io";
     // Create HTTP client
-    const http = new HttpClient("autodev-action");
+    const http = new HttpClient("devbird-action");
 
     async function linkGitHubAction() {
       core.info(`Linking GitHub Action run ${runId} to task using token`);
 
-      const linkEndpoint = `${baseUrl}/delino.autodev.v1.AutoDev/LinkGitHubActionByToken`;
+      const linkEndpoint = `${baseUrl}/delino.devbird.v1.DevBird/LinkGitHubActionByToken`;
 
       // Prepare request body
       const linkRequestBody = JSON.stringify({
@@ -89,7 +89,7 @@ async function run(): Promise<void> {
         core.info(`Found ${branches.length} branches: ${branches.join(", ")}`);
 
         // Send branches to the server
-        const branchEndpoint = `${baseUrl}/delino.autodev.v1.AutoDev/RegisterBranchesByToken`;
+        const branchEndpoint = `${baseUrl}/delino.devbird.v1.DevBird/RegisterBranchesByToken`;
         const branchRequestBody = JSON.stringify({
           workflow_execution_token: workflowExecutionToken,
           branch_names: branches,
@@ -161,7 +161,7 @@ async function run(): Promise<void> {
               });
 
               // Upload the plan to the server
-              const planEndpoint = `${baseUrl}/delino.autodev.v1.AutoDev/UploadTaskGraphPlanByToken`;
+              const planEndpoint = `${baseUrl}/delino.devbird.v1.DevBird/UploadTaskGraphPlanByToken`;
               const planRequestBody = JSON.stringify({
                 workflow_execution_token: workflowExecutionToken,
                 plan_filename: planFile,
@@ -210,8 +210,8 @@ async function run(): Promise<void> {
       }
     }
 
-    // Execute different actions based on autodev_mode
-    if (autodevMode === "plan") {
+    // Execute different actions based on devbird_mode
+    if (devbirdMode === "plan") {
       core.info("Running in plan mode - only uploading plan files");
       await Promise.all([linkGitHubAction(), uploadPlanFiles()]);
     } else {
