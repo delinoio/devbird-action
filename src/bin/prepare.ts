@@ -6,7 +6,7 @@ async function run(): Promise<void> {
   try {
     // Get inputs
     const workflowExecutionToken = core.getInput(
-      "autodev_workflow_execution_token",
+      "devbird_workflow_execution_token",
       { required: true }
     );
     const delinoAccessToken = core.getInput("delino_access_token", {
@@ -34,10 +34,10 @@ async function run(): Promise<void> {
 
         // Exchange OIDC token for GitHub App installation token
         const baseUrl =
-          process.env.AUTODEV_API_URL || "https://autodev.api.delino.io";
-        const endpoint = `${baseUrl}/delino.autodev.v1.AutoDev/ExchangeOIDCTokenForGitHubToken`;
+          process.env.DEVBIRD_API_URL || "https://devbird.api.delino.io";
+        const endpoint = `${baseUrl}/delino.devbird.v1.DevBird/ExchangeOIDCTokenForGitHubToken`;
 
-        const http = new HttpClient("autodev-action");
+        const http = new HttpClient("devbird-action");
         const requestBody = JSON.stringify({
           oidc_token: oidcToken,
           repository_owner: context.repo.owner,
@@ -77,7 +77,7 @@ async function run(): Promise<void> {
     }
 
     // Log preparation info
-    core.info(`Preparing AutoDev environment for ${agent} agent`);
+    core.info(`Preparing DevBird environment for ${agent} agent`);
     core.info(`Repository: ${context.repo.owner}/${context.repo.repo}`);
     core.info(`Base branch: ${baseBranch || "default"}`);
 
@@ -94,10 +94,10 @@ async function run(): Promise<void> {
 
       try {
         const baseUrl =
-          process.env.AUTODEV_API_URL || "https://autodev.api.delino.io";
-        const endpoint = `${baseUrl}/delino.autodev.v1.AutoDev/LinkGitHubActionByToken`;
+          process.env.DEVBIRD_API_URL || "https://devbird.api.delino.io";
+        const endpoint = `${baseUrl}/delino.devbird.v1.DevBird/LinkGitHubActionByToken`;
 
-        const http = new HttpClient("autodev-action");
+        const http = new HttpClient("devbird-action");
         const requestBody = JSON.stringify({
           workflow_execution_token: workflowExecutionToken,
           github_run_id: runId,

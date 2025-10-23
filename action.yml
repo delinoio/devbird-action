@@ -1,4 +1,4 @@
-name: "AutoDev Action v0.1"
+name: "DevBird Action v0.1"
 description: "Fully automated AI-powered development workflow for GitHub repositories."
 branding:
   icon: 'archive'
@@ -6,15 +6,15 @@ branding:
   
 inputs:
   prompt:
-    description: "Instructions for AutoDev. Can be a direct prompt or custom template."
+    description: "Instructions for DevBird. Can be a direct prompt or custom template."
     required: true
 
   base_branch:
     description: "The branch to use as the base/source when creating new branches (defaults to repository default branch)"
     required: false
 
-  autodev_mode:
-    description: "The AutoDev execution mode. Can be 'develop' (default) or 'plan' (for task graph planning)"
+  devbird_mode:
+    description: "The DevBird execution mode. Can be 'develop' (default) or 'plan' (for task graph planning)"
     required: false
     default: 'develop'
 
@@ -50,8 +50,8 @@ inputs:
     description: "Google API key"
     required: false
 
-  autodev_workflow_execution_token:
-    description: "AutoDev workflow execution token"
+  devbird_workflow_execution_token:
+    description: "DevBird workflow execution token"
     required: true
 
   delino_access_token:
@@ -64,12 +64,12 @@ runs:
     # Prepare resources
     - name: Prepare
       id: prepare
-      uses: delinoio/autodev-action/prepare@main
+      uses: delinoio/devbird-action/prepare@main
       with:
         agent: ${{ inputs.agent }}
         agent_model: ${{ inputs.agent_model }}
-        autodev_mode: ${{ inputs.autodev_mode }}
-        autodev_workflow_execution_token: ${{ inputs.autodev_workflow_execution_token }}
+        devbird_mode: ${{ inputs.devbird_mode }}
+        devbird_workflow_execution_token: ${{ inputs.devbird_workflow_execution_token }}
         base_branch: ${{ inputs.base_branch }}
         delino_access_token: ${{ inputs.delino_access_token }}
 
@@ -84,7 +84,7 @@ runs:
         claude_args: |
           --allowed-tools 'Bash,Edit,Write,WebSearch,WebFetch'
 
-        branch_prefix: 'autodev/'
+        branch_prefix: 'devbird/'
         base_branch: ${{ inputs.base_branch }}
         github_token: ${{ steps.prepare.outputs.github_token }}
         use_sticky_comment: true
@@ -97,7 +97,7 @@ runs:
           Context:
             - Repository: ${{ github.repository }}
             - Base branch: ${{ inputs.base_branch }}
-            - Use `autodev/` prefix for new branch names.
+            - Use `devbird/` prefix for new branch names.
 
 
     - name: Run Codex
@@ -114,7 +114,7 @@ runs:
           Context:
             - Repository: ${{ github.repository }}
             - Base branch: ${{ inputs.base_branch }}
-            - Use `autodev/` prefix for new branch names.
+            - Use `devbird/` prefix for new branch names.
 
     - name: Run Gemini CLI
       if: inputs.agent == 'gemini_cli'
@@ -133,7 +133,7 @@ runs:
           Context:
             - Repository: ${{ github.repository }}
             - Base branch: ${{ inputs.base_branch }}
-            - Use `autodev/` prefix for new branch names.
+            - Use `devbird/` prefix for new branch names.
 
     - name: Run OpenCode
       if: inputs.agent == 'opencode'
@@ -186,7 +186,7 @@ runs:
         Context:
           - Repository: ${{ github.repository }}
           - Base branch: ${{ inputs.base_branch }}
-          - Use \`autodev/\` prefix for new branch names."
+          - Use \`devbird/\` prefix for new branch names."
 
         # Run OpenCode with the prompt
         if [ -n "${{ inputs.agent_model }}" ]; then
@@ -198,11 +198,11 @@ runs:
 
     # Run the postprocess
     - name: Postprocess
-      uses: delinoio/autodev-action/postprocess@main
+      uses: delinoio/devbird-action/postprocess@main
       with:
         agent: ${{ inputs.agent }}
         agent_model: ${{ inputs.agent_model }}
-        autodev_mode: ${{ inputs.autodev_mode }}
-        autodev_workflow_execution_token: ${{ inputs.autodev_workflow_execution_token }}
+        devbird_mode: ${{ inputs.devbird_mode }}
+        devbird_workflow_execution_token: ${{ inputs.devbird_workflow_execution_token }}
         base_branch: ${{ inputs.base_branch }}
         delino_access_token: ${{ inputs.delino_access_token }}
